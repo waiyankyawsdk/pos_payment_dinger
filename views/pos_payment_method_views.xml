@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_payment_method_view_form_inherit_pos_dinger" model="ir.ui.view">
+        <field name="name">pos.payment.method.form.inherit.dinger</field>
+        <field name="model">pos.payment.method</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='use_payment_terminal']" position="after">
+                <!-- Dinger -->
+                <field name="description" readonly="True" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
+                <field name="project_name" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
+                <field name="api_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
+                <field name="public_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
+                <field name="merchant_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
+                <div colspan="2" class="mt16" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'">
+                    <button name="action_dinger_key" type="object" icon="oi-arrow-right" string="Don't forget to complete Dinger connect before using this payment method." class="btn-link"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
