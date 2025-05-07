@@ -16,15 +16,15 @@
     ],
     'assets': {
         "point_of_sale._assets_pos": [
-            '/pos_test/static/src/app/overrides/models/models.js',
-            '/pos_test/static/src/app/payment_dinger.js',
-            '/pos_test/static/src/app/navbar/*.xml',
-            '/pos_test/static/src/app/**/**/*.xml',
-            '/pos_test/static/src/app/**/**/*.scss',
-            '/pos_test/static/src/app/**/**/**/*.xml',
-            '/pos_test/static/src/app/**/**/**/*.scss',
-            # '/pos_test/static/src/app/screens/receipt_screen/receipt/order_receipt.js',
-            '/pos_test/static/src/app/screens/receipt_screen/receipt/order_receipt.xml',
+            '/pos_payment_dinger/static/src/app/overrides/models/models.js',
+            '/pos_payment_dinger/static/src/app/payment_dinger.js',
+            '/pos_payment_dinger/static/src/app/navbar/*.xml',
+            '/pos_payment_dinger/static/src/app/**/**/*.xml',
+            '/pos_payment_dinger/static/src/app/**/**/*.scss',
+            '/pos_payment_dinger/static/src/app/**/**/**/*.xml',
+            '/pos_payment_dinger/static/src/app/**/**/**/*.scss',
+            # '/pos_payment_dinger/static/src/app/screens/receipt_screen/receipt/order_receipt.js',
+            '/pos_payment_dinger/static/src/app/screens/receipt_screen/receipt/order_receipt.xml',
         ]
 
     },
