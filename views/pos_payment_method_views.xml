@@ -9,12 +9,18 @@
                 <!-- Dinger -->
                 <field name="description" readonly="True" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
                 <field name="project_name" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
-                <field name="api_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
                 <field name="public_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
+                <field name="merchant_name" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
                 <field name="merchant_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
-                <div colspan="2" class="mt16" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'">
-                    <button name="action_dinger_key" type="object" icon="oi-arrow-right" string="Don't forget to complete Dinger connect before using this payment method." class="btn-link"/>
-                </div>
+                <field name="client_id" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
+                <field name="secret_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
+            </xpath>
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="parent_method_id" invisible="is_parent" domain="[('is_parent', '=', True)]"/>
+                <field name="parent_payment_method_name" invisible="is_parent"/>
+                <field name="is_parent" invisible="parent_method_id!=False"/>
+                <field name="commission_tax_percentage" invisible="is_parent" style="width: 80px;" widget="percentage"/>
+                <field name="commission_tax_fix" invisible="is_parent"/>
             </xpath>
         </field>
     </record>

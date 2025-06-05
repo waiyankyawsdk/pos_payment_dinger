@@ -21,26 +21,41 @@ class PosPaymentMethod(models.Model):
     def _get_payment_terminal_selection(self):
         return super()._get_payment_terminal_selection() + [('dinger', 'Dinger')]
 
-    # payment_t=fields.Char(string="Payment Type")
+    is_parent=fields.Boolean(string="Parent")
+    parent_method_id=fields.Many2one('pos.payment.method',string="Parent Method")
+    parent_payment_method_name=fields.Char(string="Parent Method Name")
+
+    commission_tax_percentage = fields.Float(default=0.0, string="Bank transaction Percentage")
+    commission_tax_fix = fields.Float(default=0.0, string="Bank transaction Amount")
 
     project_name = fields.Char(
         string="Dinger Project Name",
         help="Name of the project in the Dinger dashboard.",
     )
 
-    api_key = fields.Char(
-        string="Dinger Wallet Api Key",
-        help="Wallet API key from the Dinger dashboard.",
-    )
-
     public_key = fields.Char(
-        string="Dinger Wallet Public Key",
+        string="Public Key",
         help="Wallet public key from the Dinger dashboard.",
     )
 
-    merchant_key = fields.Char(
-        string="Dinger Wallet Merchant Key",
+    merchant_name = fields.Char(
+        string="Merchant Name",
         help="Wallet Merchant key from the Dinger dashboard.",
+    )
+
+    merchant_key = fields.Char(
+        string="Merchant Key",
+        help="Wallet Merchant key from the Dinger dashboard.",
+    )
+
+    client_id = fields.Char(
+        string="Client Id",
+        help="Wallet Client ID from the Dinger dashboard.",
+    )
+
+    secret_key = fields.Char(
+        string="Secret Key",
+        help="Wallet Secret key from the Dinger dashboard.",
     )
 
     description = fields.Text(
@@ -48,14 +63,16 @@ class PosPaymentMethod(models.Model):
         default="Payment made by an Odoo Pos.",
     )
 
-    #
     @api.model
     def _load_pos_data_fields(self, config_id):
         params = super()._load_pos_data_fields(config_id)
+        params += ['parent_payment_method_name']
         params += ['project_name']
-        params += ['api_key']
         params += ['public_key']
+        params += ['merchant_name']
         params += ['merchant_key']
+        params += ['client_id']
+        params += ['secret_key']
         return params
 
     def _get_dinger_payment_provider(self):
@@ -296,3 +313,21 @@ class PosPaymentMethod(models.Model):
         return {
             'terminal_request': 'https://terminal-api-%s.adyen.com/async',
         }
+
+    @api.onchange('parent_method_id')
+    def _onchange_parent_method(self):
+        self.payment_method_type="terminal"
+        self.project_name=self.parent_method_id.project_name
+        self.public_key=self.parent_method_id.public_key
+        self.merchant_name=self.parent_method_id.merchant_name
+        self.merchant_key=self.parent_method_id.merchant_key
+        self.client_id=self.parent_method_id.client_id
+        self.secret_key=self.parent_method_id.secret_key
+        self.journal_id=self.parent_method_id.journal_id
+        self.outstanding_account_id=self.parent_method_id.outstanding_account_id
+        self.use_payment_terminal="dinger"
+        self.parent_payment_method_name = self.parent_method_id.name
+        if self.parent_method_id:
+            self.is_parent = False
+
+

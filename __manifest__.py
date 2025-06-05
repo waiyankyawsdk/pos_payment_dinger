@@ -10,21 +10,13 @@
         # 'views/assets_dinger.xml',
         'views/pos_payment_method_views.xml',
         'views/res_config_settings_views.xml',
-        'views/pos_payment.xml',
-        'views/pos_order_view.xml',
-
     ],
     'assets': {
         "point_of_sale._assets_pos": [
             '/pos_payment_dinger/static/src/app/overrides/models/models.js',
             '/pos_payment_dinger/static/src/app/payment_dinger.js',
-            '/pos_payment_dinger/static/src/app/navbar/*.xml',
-            '/pos_payment_dinger/static/src/app/**/**/*.xml',
-            '/pos_payment_dinger/static/src/app/**/**/*.scss',
-            '/pos_payment_dinger/static/src/app/**/**/**/*.xml',
-            '/pos_payment_dinger/static/src/app/**/**/**/*.scss',
-            # '/pos_payment_dinger/static/src/app/screens/receipt_screen/receipt/order_receipt.js',
-            '/pos_payment_dinger/static/src/app/screens/receipt_screen/receipt/order_receipt.xml',
+            '/pos_payment_dinger/static/src/app/screens/payment_screen/payment_screen.xml',
+            '/pos_payment_dinger/static/src/app/screens/payment_screen/payment_screen.scss'
         ]
 
     },

@@ -10,7 +10,7 @@
                          title="The transactions are processed by Dinger. Set your Dinger credentials on the related payment method."
                          string="Dinger" help="Accept payments with a Dinger payment terminal"
                          documentation="applications/sales/point_of_sale/payment_methods/terminals/dinger.html">
-                    <field name="module_pos_dinger"/>
+                    <field name="dinger_payment_terminal"/>
                 </setting>
             </xpath>
         </field>

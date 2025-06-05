@@ -1,0 +1,26 @@
+/* Hide the actual checkbox */
+.dropdown-toggle-checkbox {
+  display: none;
+}
+
+/* Hide dropdown menu by default */
+.dropdown-menu-for-payment-screen {
+  display: none;
+  position: relative;
+  background:transparent;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+}
+
+
+/* Show the menu only when checkbox is checked */
+.dropdown-toggle-checkbox:checked + label + .dropdown-menu-for-payment-screen {
+  display: block !important;
+}
+
+.childpaymentmethod{
+    margin-left:35px;
+    margin-top:10px;
+    }

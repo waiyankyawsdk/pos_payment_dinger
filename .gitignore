@@ -1,0 +1,6 @@
+# Ignore all __pycache__ directories and *.pyc files inside them
+payment_dinger/models/__pycache__/
+payment_dinger/models/__pycache__/*.pyc
+
+payment_dinger/__pycache__/
+payment_dinger/__pycache__/*.pyc

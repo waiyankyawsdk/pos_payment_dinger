@@ -10,9 +10,6 @@ from odoo.exceptions import ValidationError, UserError, AccessError, AccessDenie
 class PosPaymentMethod(models.Model):
     _inherit = 'pos.payment'
 
-    payment_type = fields.Char(
-        string="Payment Type",
-    )
     # qr_code = fields.Binary("QR Code", attachment=True, readonly=True)
 
     # Getting the token form the api by using project name,api key and merchant key,
