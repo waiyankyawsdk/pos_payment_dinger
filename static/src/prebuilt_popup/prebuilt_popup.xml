@@ -1,0 +1,129 @@
+<templates id="template" xml:space="preserve">
+  <t t-name="pos_payment_dinger.PrebuiltPopup">
+    <Dialog title="Checkout">
+      <div class="d-flex">
+        <!-- Sidebar Steps -->
+          <div class="p-4" style="width: 220px;">
+              <ol class="list-unstyled">
+                <t t-foreach="[1, 2, 3]" t-as="stepNumber" t-key="stepNumber">
+                    <li class="d-flex align-items-center mb-4"
+                        t-att-class="{
+                            'clickable': state.step > stepNumber,
+                            'active-step': state.step === stepNumber,
+                            'completed-step': state.step > stepNumber
+                        }"
+                        t-on-click="() => onStepClick(stepNumber)">
+                        <div class="step-circle me-3"
+                             t-att-class="{
+                                'bg-white text-dark border': state.step === stepNumber,
+                                'bg-success text-white': state.step > stepNumber
+                             }">
+                            <t t-esc="stepNumber"/>
+                        </div>
+                        <span>
+                            <t t-if="stepNumber === 1">Customer Details</t>
+                            <t t-if="stepNumber === 2">Order Summary</t>
+                            <t t-if="stepNumber === 3">QR Payment</t>
+                        </span>
+                    </li>
+                </t>
+              </ol>
+        </div>
+          <span class="horizontal_line"/>
+
+          <!-- Sliding Content -->
+          <div class="flex-grow-1 p-4">
+              <!-- Step 1: Customer Details -->
+              <div t-if="state.step === 1">
+            <h5>Customer Information</h5>
+                  <form>
+              <div class="mb-3">
+                <label>Customer Name</label>
+                  <input t-model="state.customerName" class="form-control"/>
+              </div>
+                      <div class="mb-3">
+                <label>Email</label>
+                          <input t-model="state.email" class="form-control"/>
+              </div>
+                      <div class="mb-3">
+                <label>Phone</label>
+                          <input t-model="state.phone" class="form-control"/>
+              </div>
+                      <div class="mb-3">
+                <label>Address</label>
+                          <input t-model="state.address" class="form-control"/>
+              </div>
+            </form>
+                  <button class="btn btn-primary" t-on-click="nextStep">Continue</button>
+          </div>
+
+              <!-- Step 2: Order Summary -->
+              <div t-if="state.step === 2">
+                  <h2><b>Order Summary</b></h2>
+                  <div t-name="pos_payment_dinger.PrebuiltPopup" class="d-flex justify-between items-start mb-4">
+                      <!-- Left: POS Logo -->
+                      <div class="left-logo">
+                            <img src="/web/static/img/logo.png" alt="POS Logo" style="height: 80px;"/>
+                        </div>
+
+                      <!-- Right: Order Information -->
+                      <div class="right-info text-right">
+                            <p><strong>Order ID:</strong>
+                                <t t-esc="order.name"/></p>
+                          <p><strong>Customer:</strong>
+                              <t t-esc="state.customerName"/></p>
+                          <p><strong>Email:</strong>
+                              <t t-esc="state.email"/></p>
+                          <p><strong>Phone:</strong>
+                              <t t-esc="state.phone"/></p>
+                          <p><strong>Address:</strong>
+                              <t t-esc="state.address"/></p>
+                        </div>
+                  </div>
+
+                  <!-- Summary table can be added here -->
+                  <table style="width: 100%; border-collapse: collapse; font-family: sans-serif;">
+                      <thead>
+                          <tr style="background-color: #f0f0f0;">
+                              <th style="text-align: left; padding: 8px;">Product</th>
+                              <th style="text-align: left; padding: 8px;">Quantity</th>
+                              <th style="text-align: left; padding: 8px;">Tax.%</th>
+                              <th style="text-align: left; padding: 8px;">Disc.%</th>
+                              <th style="text-align: left; padding: 8px;">Price</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                      <t t-foreach="state.orderLines" t-as="line" t-key="line.product">
+                          <tr style="border-bottom: 1px solid #ddd;">
+                              <td style="padding: 8px;"><t t-esc="line.product"/></td>
+                              <td style="padding: 8px;"><t t-esc="line.quantity"/></td>
+                              <td style="padding: 8px;"><t t-esc="line.tax"/></td>
+                              <td style="padding: 8px;"><t t-esc="line.discount"/></td>
+                              <td style="padding: 8px;"><t t-esc="line.price"/></td>
+                          </tr>
+                      </t>
+                          <tr style="border-bottom:1px solid #ddd;">
+                              <td style="padding: 8px;"> </td>
+                              <td style="padding: 8px;"> </td>
+                              <td style="padding: 8px;"> </td>
+                              <td style="padding: 8px;"> </td>
+                              <td style="padding: 8px;"><b><t t-esc="state.total"/></b></td>
+                          </tr>
+                  </tbody>
+              </table>
+
+                  <button style="margin-top:10px;" class="btn btn-primary" t-on-click="nextStep">Proceed to Payment</button>
+          </div>
+
+              <!-- Step 3: QR Payment -->
+              <div t-if="state.step === 3">
+            <h5>Scan to Pay</h5>
+                  <img src="/path/to/your/qr-code.png" alt="QR Code" style="width: 200px;"/>
+                  <p class="mt-2 fw-bold">1006.2 USD</p>
+                  <button class="btn btn-success" t-on-click="confirm">Payment Completed</button>
+          </div>
+        </div>
+      </div>
+    </Dialog>
+  </t>
+</templates>

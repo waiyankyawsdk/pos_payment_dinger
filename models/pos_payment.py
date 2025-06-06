@@ -13,7 +13,8 @@ class PosPaymentMethod(models.Model):
     # qr_code = fields.Binary("QR Code", attachment=True, readonly=True)
 
     # Getting the token form the api by using project name,api key and merchant key,
-    def _get_dinger_auth_token(self):
+    @staticmethod
+    def get_dinger_auth_token():
         url = "https://staging.dinger.asia/payment-gateway-uat/api/token"
         params = {
             "projectName": "sannkyi staging",  # self.project_name,
