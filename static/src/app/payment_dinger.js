@@ -56,10 +56,12 @@ export class PaymentDinger extends PaymentInterface {
     async processPayment(selectedMethod,respone_token,line,uuid,order) {
         if (selectedMethod != '') {
             this._call_dinger_payment(respone_token,selectedMethod, line,uuid).then((response_pay) => {
-                if(response_pay.message == 'Request Success'){
+//                if(response_pay.message == 'Request Success'){
+//                    line.set_payment_status("done");
+//                    return this.waitForPaymentConfirmation(line,order);
+//                }
                     line.set_payment_status("done");
                     return this.waitForPaymentConfirmation(line,order);
-                }
             }).catch((error) => {
                     console.error("Error fetching token:", error);
             });
@@ -142,7 +144,7 @@ export class PaymentDinger extends PaymentInterface {
 //         const result = await rpc("/pos/order/payment_methods", {});
 //         const orderTypes = result.order_types;
         const order = this.pos.get_order();
-        const payload = await makeAwaitable(this.dialog, PrebuiltPopup, {
+        const payload_result = await makeAwaitable(this.dialog, PrebuiltPopup, {
             title: _t("Custom Popup!"),
             order: order,
             line: line,
@@ -151,54 +153,13 @@ export class PaymentDinger extends PaymentInterface {
             paymentMethodId:this.payment_method_id.id,
             token:token,
         });
+        console.log(payload_result);
+//        this.validateOrder(true);
         }
-
-
-        // Load the QRCode library dynamically if not already loaded
-//        await loadJS("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js");
-//        return new Promise((resolve, reject) => {
-//        // Create a container div for the QR code
-//        const qrCodeContainerId = "dynamic_qr_code";
-//        const qrDiv = `o<div id="${qrCodeContainerId}" class="d-flex justify-content-center"></div>`
-//
-//        // Show the dialog with a placeholder div for QR code
-//        this.env.services.dialog.add(AlertDialog, {
-//            title: _t("Scan Me"),
-//            body: markup(qrDiv),
-//            confirm: () => {
-//                // Handle confirmation logic if needed
-//                this.pos.data.silentCall("pos.payment", "make_payment", [
-//                    [this.payment_method_id.id],  // Pass payment method ID
-//                    token,
-//                    payment_method_type,
-//                    ]).then((result) => {
-//                        resolve(result);  // Ensure the function returns the resolved response
-//                    }).catch((error) => {
-//                        reject(error);
-//                    });
-//                },
-//            cancel: () => {
-//                reject(new Error("User cancelled payment"));
-//                // Handle cancellation logic if needed
-//            }
-//        });
-//        // Wait for the DOM to update before generating the QR code
-//        setTimeout(() => {
-//            let qrElement = document.getElementById(qrCodeContainerId);
-//            if (qrElement) {
-//                new QRCode(qrElement, {
-//                    text: "hello",  // Use token as QR data
-//                    width: 150,
-//                    height: 150
-//                });
-//            }
-//        }, 300); // Delay to allow the modal to render
-//        });
-//    }
 
     waitForPaymentConfirmation(order,line) {
         return new Promise((resolve) => {
-            this.paymentLineResolvers[this.pending_adyen_line().uuid] = resolve;
+            this.paymentLineResolvers[this.pending_dinger_line().uuid] = resolve;
         });
     }
 

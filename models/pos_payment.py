@@ -15,16 +15,17 @@ class PosPaymentMethod(models.Model):
     # Getting the token form the api by using project name,api key and merchant key,
     @staticmethod
     def get_dinger_auth_token():
-        url = "https://staging.dinger.asia/payment-gateway-uat/api/token"
-        params = {
-            "projectName": "sannkyi staging",  # self.project_name,
-            "apiKey": "m7v9vlk.eaOE1x3k9FnSH-Wm6QtdM1xxcEs",  # self.api_key,
-            "merchantName": "mtktest",  # self.merchant_key
-        }
-        response = requests.get(url, params=params)
-        if response.status_code == 200:
-            return response.json()
-        return None
+        return "test"
+        # url = "https://staging.dinger.asia/payment-gateway-uat/api/token"
+        # params = {
+        #     "projectName": "sannkyi staging",  # self.project_name,
+        #     "apiKey": "m7v9vlk.eaOE1x3k9FnSH-Wm6QtdM1xxcEs",  # self.api_key,
+        #     "merchantName": "mtktest",  # self.merchant_key
+        # }
+        # response = requests.get(url, params=params)
+        # if response.status_code == 200:
+        #     return response.json()
+        # return None
 
     # Segmentation encryption
     def encrypt(self, public_key, message):
@@ -41,7 +42,7 @@ class PosPaymentMethod(models.Model):
             return base64.b64encode(cipher_text).decode()
 
     def make_payment(self, token, payment_method_type):
-        token_value = token.get("response", {}).get("paymentToken")
+        # token_value = token.get("response", {}).get("paymentToken")
 
         # self.public_key //need to assign this
         # public_key = ("-----BEGIN PUBLIC KEY-----\n"

@@ -6,5 +6,9 @@ class ResConfigSettings(models.TransientModel):
 
     dinger_payment_terminal = fields.Boolean(string="Dinger Payment Terminal",
                                              config_parameter='pos_dinger.enabled',
-                                       help="The transactions are processed by Dinger. Set your Dinger credentials on the related payment method.")
+                                             help="The transactions are processed by Dinger. Set your Dinger credentials on the related payment method.")
 
+    account_default_pos_receivable_difference_account_id = fields.Many2one('account.account',
+                                                                           string='Default Account Receivable (PoS)',
+                                                                           config_parameter='pos_dinger.default_pos_receivable_difference_account_id',
+                                                                           check_company=True)

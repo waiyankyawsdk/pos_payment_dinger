@@ -1,7 +1,9 @@
 /** @odoo-module */
 import { Dialog } from "@web/core/dialog/dialog";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
-import { Component, useState } from "@odoo/owl";
+import { loadJS } from "@web/core/assets";
+import { Component, useState} from "@odoo/owl";
+
 export class PrebuiltPopup extends Component {
     static template = "pos_payment_dinger.PrebuiltPopup";
     static components = { Dialog };
@@ -19,6 +21,7 @@ export class PrebuiltPopup extends Component {
         const amount_total = this.order.getTotalDue?.() || 0.00;
         const safeNumber = this.safeNumber.bind(this);
         const getTaxPercentage = this.getTaxPercentage.bind(this);
+
         this.state = useState({
             step: 1,
             customerName: partner.name,
@@ -54,20 +57,37 @@ export class PrebuiltPopup extends Component {
         return total;
     }
 
-    //Here need to create payload and silent call to diner pay method
-    nextStep() {
-        if (this.state.step < 3) {
+    async generateQRCode(text) {
+        await loadJS("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js");
+        // Create a container div for the QR code
+        const qrCodeContainerId = "dynamic_qr_code";
+        const qrDiv = `o<div id="${qrCodeContainerId}" class="d-flex justify-content-center"></div>`
+            let qrElement = document.getElementById(qrCodeContainerId);
+            if (qrElement) {
+                 const jsonString = JSON.stringify(text);
+                 console.log(jsonString);
+                new QRCode(qrElement, {
+                    text: jsonString,  // Use token as QR data
+                    width: 150,
+                    height: 150
+                });
+            }
+    }
 
+    //Here need to create payload and silent call to diner pay method
+     async nextStep() {
+        if (this.state.step < 3) {
             if(this.state.step==2){
+            //Here initiate call to dinger with payload
                 this.pos.data.silentCall("pos.payment", "make_payment", [
                                             [this.paymentMethodId],  // Pass payment method ID
                                             this.token,
                                             this.paymentMethodType,
-                                            ]).then((result) => {
-                                            this.state.step += 1;
-                                            //Modify for the payment result:
+                                            ]).then(async (result) => {
+                                                await this.generateQRCode(result);
+                                                this.state.step += 1;
                                             }).catch((error) => {
-                                                reject(error);
+                                                throw error;
                                             });
             }
             else{
