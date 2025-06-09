@@ -20,7 +20,7 @@ export class PrebuiltPopup extends Component {
         const orderlines = this.order.get_orderlines?.() || [];
         const amount_total = this.order.getTotalDue?.() || 0.00;
         const safeNumber = this.safeNumber.bind(this);
-        const getTaxPercentage = this.getTaxPercentage.bind(this);
+//        const getTaxPercentage = this.getTaxPercentage.bind(this);
 
         this.state = useState({
             step: 1,
@@ -32,7 +32,7 @@ export class PrebuiltPopup extends Component {
             total:amount_total,
             orderLines: orderlines.map(l => ({
                 product: l.product_id.display_name,
-                tax:getTaxPercentage(l.tax_ids_after_fiscal_position),
+                tax:l.tax_ids_after_fiscal_position,
                 discount:safeNumber(l.discount),
                 price: safeNumber(l.price_unit),
                 quantity: l.qty,
@@ -42,19 +42,6 @@ export class PrebuiltPopup extends Component {
 
     safeNumber(val) {
         return (val === null || val === false || val === "" || (Array.isArray(val) && val.length === 0)) ? 0.00 : val;
-    }
-
-    getTaxPercentage(taxIds) {
-        if (!Array.isArray(taxIds) || taxIds.length === 0) return 0.00;
-
-        let total = 0;
-        for (let id of taxIds) {
-            const tax = this.pos.taxes.find(t => t.id === id);
-            if (tax) {
-                total += tax.amount || 0;
-            }
-        }
-        return total;
     }
 
     async generateQRCode(text) {
@@ -84,8 +71,8 @@ export class PrebuiltPopup extends Component {
                                             this.token,
                                             this.paymentMethodType,
                                             ]).then(async (result) => {
-                                                await this.generateQRCode(result);
                                                 this.state.step += 1;
+                                                await this.generateQRCode(result);
                                             }).catch((error) => {
                                                 throw error;
                                             });

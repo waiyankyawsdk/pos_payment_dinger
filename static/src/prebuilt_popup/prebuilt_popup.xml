@@ -98,7 +98,7 @@
                           <tr style="border-bottom: 1px solid #ddd;">
                               <td style="padding: 8px;"><t t-esc="line.product"/></td>
                               <td style="padding: 8px;"><t t-esc="line.quantity"/></td>
-                              <td style="padding: 8px;"><t t-esc="line.tax"/></td>
+                              <td style="padding: 8px;"><t t-esc="line.tax" widget="many2many_tags"/></td>
                               <td style="padding: 8px;"><t t-esc="line.discount"/></td>
                               <td style="padding: 8px;"><t t-esc="line.price"/></td>
                           </tr>

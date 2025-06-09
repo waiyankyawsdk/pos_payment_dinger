@@ -25,9 +25,6 @@ class PosPaymentMethod(models.Model):
     parent_method_id=fields.Many2one('pos.payment.method',string="Parent Method")
     parent_payment_method_name=fields.Char(string="Parent Method Name")
 
-    commission_tax_percentage = fields.Float(default=0.0, string="Bank transaction Percentage")
-    commission_tax_fix = fields.Float(default=0.0, string="Bank transaction Amount")
-
     project_name = fields.Char(
         string="Dinger Project Name",
         help="Name of the project in the Dinger dashboard.",
