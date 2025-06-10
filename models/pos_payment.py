@@ -27,6 +27,19 @@ class PosPaymentMethod(models.Model):
         #     return response.json()
         # return None
 
+    def get_country_code(self,country):
+        url = "https://staging.dinger.asia/payment-gateway-uat/api/countryCodeListEnquiry"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            print("Dinger Country Code getting success...")
+            country_list = data.get("response", [])
+            for entry in country_list:
+                countries = entry.get("country", "").lower()
+                if country.lower() in countries:
+                    return entry.get("code")
+        return None
+
     # Segmentation encryption
     def encrypt(self, public_key, message):
         try:
@@ -41,7 +54,7 @@ class PosPaymentMethod(models.Model):
         else:
             return base64.b64encode(cipher_text).decode()
 
-    def make_payment(self, token, payment_method_type):
+    def make_payment(self, token, payload):
         # token_value = token.get("response", {}).get("paymentToken")
 
         # self.public_key //need to assign this
@@ -113,30 +126,3 @@ class PosPaymentMethod(models.Model):
         # Implement payment payload send.
         token = self._get_dinger_token()
         return token
-
-    # from odoo import models, fields, api
-    #
-    # import base64
-    #
-    #
-    # class Employee(models.Model):
-    #     _inherit = 'hr.employee'
-
-    # pin_code = fields.Char(string='PIN Code', require=True)
-
-    # @api.depends('pin_code')
-    # def generate_qr_code(self,data):
-    #     qr = qrcode.QRCode(
-    #         version=1,
-    #         error_correction=qrcode.constants.ERROR_CORRECT_L,
-    #         box_size=10,
-    #         border=4,
-    #     )
-    #     qr.add_data(data)
-    #     qr.make(fit=True)
-    #
-    #     img = qr.make_image(fill='black', back_color='white')
-    #     buffer = BytesIO()
-    #     img.save(buffer, format="PNG")
-    #     qr_image = base64.b64encode(buffer.getvalue())
-    #     return qr_image

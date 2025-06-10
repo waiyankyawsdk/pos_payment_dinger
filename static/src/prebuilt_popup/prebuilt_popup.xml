@@ -40,20 +40,36 @@
                   <form>
               <div class="mb-3">
                 <label>Customer Name</label>
-                  <input t-model="state.customerName" class="form-control"/>
+                    <input t-model="state.customerName" class="form-control"/>
               </div>
-                      <div class="mb-3">
+              <div class="mb-3">
                 <label>Email</label>
-                          <input t-model="state.email" class="form-control"/>
+                <input t-model="state.email" type="email" class="form-control"/>
               </div>
-                      <div class="mb-3">
+              <div class="mb-3">
                 <label>Phone</label>
-                          <input t-model="state.phone" class="form-control"/>
+                <input t-model="state.phone" class="form-control"/>
               </div>
-                      <div class="mb-3">
+              <div class="mb-3">
                 <label>Address</label>
-                          <input t-model="state.address" class="form-control"/>
+                <input t-model="state.address" class="form-control"/>
               </div>
+              <div class="mb-3">
+                <label>City</label>
+                <input t-model="state.billCity" class="form-control"/>
+              </div>
+              <div class="mb-3">
+                <label>State</label>
+                <input t-model="state.state" class="form-control"/>
+              </div>
+              <div class="mb-3">
+                <label>Country</label>
+                <input t-model="state.country" class="form-control"/>
+              </div>
+             <div class="mb-3">
+                <label>Postal Code</label>
+                <input t-model="state.postalCode" class="form-control"/>
+             </div>
             </form>
                   <button class="btn btn-primary" t-on-click="nextStep">Continue</button>
           </div>
@@ -98,7 +114,12 @@
                           <tr style="border-bottom: 1px solid #ddd;">
                               <td style="padding: 8px;"><t t-esc="line.product"/></td>
                               <td style="padding: 8px;"><t t-esc="line.quantity"/></td>
-                              <td style="padding: 8px;"><t t-esc="line.tax" widget="many2many_tags"/></td>
+                              <td style="padding: 8px;">
+                                <t t-foreach="line.taxes" t-as="tax" t-key="tax">
+                                    <span><t t-esc="tax.name"/></span>
+                                </t>
+                              </td>
+
                               <td style="padding: 8px;"><t t-esc="line.discount"/></td>
                               <td style="padding: 8px;"><t t-esc="line.price"/></td>
                           </tr>

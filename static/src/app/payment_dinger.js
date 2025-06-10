@@ -32,6 +32,7 @@ export class PaymentDinger extends PaymentInterface {
 //        var data = this._dinger_pay_data();
         var line = order.payment_ids.find((paymentLine) => paymentLine.uuid === uuid);
 
+
         this.processPayment(this.selectedMethod,"test",line,uuid,order);
 
         /* For testing
@@ -144,6 +145,12 @@ export class PaymentDinger extends PaymentInterface {
 //         const result = await rpc("/pos/order/payment_methods", {});
 //         const orderTypes = result.order_types;
         const order = this.pos.get_order();
+//        order.get_orderlines().forEach((line, index) => {
+//            console.log(`Order Line ${index + 1}:`);
+//            console.log("  Product:", line.product?.display_name || line.product?.name);
+//            console.log("  tax_ids:", line.tax_ids);
+//        });
+
         const payload_result = await makeAwaitable(this.dialog, PrebuiltPopup, {
             title: _t("Custom Popup!"),
             order: order,
