@@ -61,8 +61,12 @@ export class PaymentDinger extends PaymentInterface {
 //                    line.set_payment_status("done");
 //                    return this.waitForPaymentConfirmation(line,order);
 //                }
-                    line.set_payment_status("done");
-                    return this.waitForPaymentConfirmation(line,order);
+                    if (typeof response_pay !== 'undefined' && response_pay) {
+                        line.set_payment_status("done");
+                        return this.waitForPaymentConfirmation(line, order);
+                    } else {
+                        console.warn("No payload returned from Dinger popup.");
+                    }
             }).catch((error) => {
                     console.error("Error fetching token:", error);
             });
@@ -142,14 +146,7 @@ export class PaymentDinger extends PaymentInterface {
 
     async _call_dinger_payment(token,payment_method_type, line,uuid){
         line.payment_type=payment_method_type;
-//         const result = await rpc("/pos/order/payment_methods", {});
-//         const orderTypes = result.order_types;
         const order = this.pos.get_order();
-//        order.get_orderlines().forEach((line, index) => {
-//            console.log(`Order Line ${index + 1}:`);
-//            console.log("  Product:", line.product?.display_name || line.product?.name);
-//            console.log("  tax_ids:", line.tax_ids);
-//        });
 
         const payload_result = await makeAwaitable(this.dialog, PrebuiltPopup, {
             title: _t("Custom Popup!"),
@@ -159,10 +156,10 @@ export class PaymentDinger extends PaymentInterface {
             paymentMethodType: this.payment_method_id.name,
             paymentMethodId:this.payment_method_id.id,
             token:token,
-        });
-        console.log(payload_result);
-//        this.validateOrder(true);
-        }
+        },);
+        //        this.validateOrder(true);
+        return payload_result;
+    }
 
     waitForPaymentConfirmation(order,line) {
         return new Promise((resolve) => {

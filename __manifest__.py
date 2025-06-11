@@ -13,8 +13,8 @@
     ],
     'assets': {
         "point_of_sale._assets_pos": [
-            '/pos_payment_dinger/static/src/prebuilt_popup/prebuilt_popup.js',
             '/pos_payment_dinger/static/src/prebuilt_popup/prebuilt_popup.xml',
+            '/pos_payment_dinger/static/src/prebuilt_popup/prebuilt_popup.js',
             '/pos_payment_dinger/static/src/prebuilt_popup/prebuilt_popup.scss',
             '/pos_payment_dinger/static/src/app/overrides/models/models.js',
             '/pos_payment_dinger/static/src/app/payment_dinger.js',

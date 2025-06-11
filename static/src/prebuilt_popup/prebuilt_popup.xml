@@ -1,7 +1,7 @@
 <templates id="template" xml:space="preserve">
   <t t-name="pos_payment_dinger.PrebuiltPopup">
       <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-      <Dialog title="Checkout">
+      <Dialog title="Checkout" footer="false">
       <div class="d-flex">
         <!-- Sidebar Steps -->
           <div class="p-4" style="width: 220px;">
@@ -143,6 +143,7 @@
                 <h5>Scan to Pay</h5>
                   <!-- Hre show the result of qr from the state of this.response -->
                     <div t-ref="qrCodeRef" id="dynamic_qr_code"/>
+<!--                  <div id="dynamic_qr_code"></div>-->
 
                   <p class="mt-2 fw-bold"><t t-esc="state.total"/> </p>
                   <button class="btn btn-success" t-on-click="confirm">Payment Completed</button>

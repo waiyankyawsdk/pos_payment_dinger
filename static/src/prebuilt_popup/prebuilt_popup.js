@@ -2,11 +2,22 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { loadJS } from "@web/core/assets";
-import { Component, useState} from "@odoo/owl";
+import { Component, useState ,onWillUnmount,onMounted} from "@odoo/owl";
 
 export class PrebuiltPopup extends Component {
     static template = "pos_payment_dinger.PrebuiltPopup";
     static components = { Dialog };
+    static props = {
+        order: Object,
+        line: Object,
+        uuid: String,
+        paymentMethodType: String,
+        paymentMethodId: Number,
+        token: String,
+        getPayload: Function,
+        title:String,
+        close: Function,
+    };
     setup() {
         this.pos = usePos();
         this.order = this.props.order;
@@ -21,6 +32,20 @@ export class PrebuiltPopup extends Component {
         const orderlines = this.order.get_orderlines?.() || [];
         const amount_total = this.order.getTotalDue?.() || 0.00;
         const safeNumber = this.safeNumber.bind(this);
+
+        //For bus service
+        this.busService = this.env.services.bus_service;
+        this.channelName = 'payment_status_test123';
+        this.onBusNotification = this.onBusNotification.bind(this);
+
+        onMounted(() => {
+            this.subscribeToBusChannel();
+        });
+
+        onWillUnmount(() => {
+            this.unsubscribeFromBusChannel();
+        });
+
 
         this.state = useState({
             step: 1,
@@ -85,13 +110,13 @@ export class PrebuiltPopup extends Component {
                     methodName: "QR",
                     totalAmount: parseFloat(this.state.total || 0.0),
                     currency: this.pos.currency?.name || "MMK",
-                    orderId: this.order.name,
+                    orderId: "test123",
                     email: this.state.email || "",
                     customerPhone : this.state.phone || "",
                     customerName: this.state.customerName || "",
                     state: this.state.state || "Yangon",
                     country: this.countryCode || "MM",
-                    postalCode: this.state.postalCode || "15015"
+                    postalCode: this.state.postalCode || "15015",
                     billAddress: this.state.address || "No Address",
                     billCity: this.state.billCity || "Yangon",
                     items: JSON.stringify(this.state.orderLines.map(line => ({
@@ -108,7 +133,12 @@ export class PrebuiltPopup extends Component {
                                             payload,
                                             ]).then(async (result) => {
                                                 this.state.step += 1;
+
+                                                //Show the qr code based on the result of payment
                                                 await this.generateQRCode(result);
+
+                                                //Start listening bus service to get the payment status from controller
+                                                this.subscribeToBusChannel();
                                             }).catch((error) => {
                                                 throw error;
                                             });
@@ -130,6 +160,38 @@ export class PrebuiltPopup extends Component {
             console.log(stepNumber);
         }
     }
+
+    subscribeToBusChannel() {
+        this.busService.addChannel(this.channelName);
+        this.busService.addEventListener("notification", this.onBusNotification);
+        console.log("Subscribed to Bus:", this.channelName);
+    }
+
+    unsubscribeFromBusChannel() {
+        this.busService.deleteChannel(this.channelName);
+        this.busService.removeEventListener("notification", this.onBusNotification);
+        console.log("Unsubscribed from Bus:", this.channelName);
+    }
+
+
+    onBusNotification({ detail: notifications }) {
+//        const notifications = event.detail;
+        console.log("Recive Noti: ");
+        for (const notification of notifications) {
+            const [channel, payload] = notification;
+            if (channel === this.channelName && payload?.status) {
+                console.log("Payment status received:", payload.status);
+                if (payload.status === "paid") {
+                    this.unsubscribeFromBusChannel();
+                    this.state.status = payload.status;
+                    this.props.close();
+                }
+            }
+        }
+    }
+
+
+
 
     //Compose payload and call dinger pay method from python
     async confirm() {

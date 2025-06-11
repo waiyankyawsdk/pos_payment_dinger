@@ -3,6 +3,7 @@
 import logging
 import werkzeug
 import pprint
+import requests
 import base64
 from urllib.parse import parse_qs
 from Crypto.Cipher import AES, PKCS1_v1_5
@@ -326,5 +327,39 @@ class PosPaymentMethod(models.Model):
         self.parent_payment_method_name = self.parent_method_id.name
         if self.parent_method_id:
             self.is_parent = False
+
+    def test_dinger_callback(self,*args, **data):
+
+        # Simulate order name and payment status
+        test_data = {
+            'order_name': 'test123',  # Replace with an actual order name for your test
+            'status': 'paid',
+        }
+
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        full_url = f"{base_url}/pos/order/dinger_payment_method"
+
+        try:
+            response = requests.post(full_url, json=test_data,headers={'Content-Type': 'application/json'}, timeout=5)
+            response.raise_for_status()
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Success',
+                    'message': f'Data sent successfully. Server responded with: {response.text}',
+                    'type': 'success',
+                }
+            }
+        except requests.RequestException as e:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Error',
+                    'message': f'Error sending test request: {str(e)}',
+                    'type': 'danger',
+                }
+            }
 
 
