@@ -142,7 +142,7 @@
               <div t-if="state.step === 3">
                 <h5>Scan to Pay</h5>
                   <!-- Hre show the result of qr from the state of this.response -->
-                    <div t-ref="qrCodeRef" id="dynamic_qr_code"/>
+                     <div t-ref="qrCodeRef" id="dynamic_qr_code"/>
 <!--                  <div id="dynamic_qr_code"></div>-->
 
                   <p class="mt-2 fw-bold"><t t-esc="state.total"/> </p>

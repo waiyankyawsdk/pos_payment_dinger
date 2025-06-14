@@ -7,9 +7,10 @@
     "description": " ",  # Non-empty string to avoid loading the README file.
     "depends": ["base", "web", "point_of_sale"],
     "data": [
-        # 'views/assets_dinger.xml',
         'views/pos_payment_method_views.xml',
         'views/res_config_settings_views.xml',
+        'views/pos_payment_status_views.xml',
+        'security/ir.model.access.csv',
     ],
     'assets': {
         "point_of_sale._assets_pos": [

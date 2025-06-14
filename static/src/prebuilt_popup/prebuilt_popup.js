@@ -2,6 +2,8 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { loadJS } from "@web/core/assets";
+import { rpc } from "@web/core/network/rpc";
+import { useService } from "@web/core/utils/hooks";
 import { Component, useState ,onWillUnmount,onMounted} from "@odoo/owl";
 
 export class PrebuiltPopup extends Component {
@@ -19,6 +21,7 @@ export class PrebuiltPopup extends Component {
         close: Function,
     };
     setup() {
+        this.orm = useService('orm');
         this.pos = usePos();
         this.order = this.props.order;
         this.line = this.props.line;
@@ -33,21 +36,8 @@ export class PrebuiltPopup extends Component {
         const amount_total = this.order.getTotalDue?.() || 0.00;
         const safeNumber = this.safeNumber.bind(this);
 
-        //For bus service
-        this.busService = this.env.services.bus_service;
-        this.channelName = 'payment_status_test123';
-        this.onBusNotification = this.onBusNotification.bind(this);
-
-        onMounted(() => {
-            this.subscribeToBusChannel();
-        });
-
-        onWillUnmount(() => {
-            this.unsubscribeFromBusChannel();
-        });
-
-
         this.state = useState({
+            paymentPaid: false,
             step: 1,
             customerName: partner.name,
             clientId:partner.id,
@@ -78,7 +68,7 @@ export class PrebuiltPopup extends Component {
         await loadJS("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js");
         // Create a container div for the QR code
         const qrCodeContainerId = "dynamic_qr_code";
-        const qrDiv = `o<div id="${qrCodeContainerId}" class="d-flex justify-content-center"></div>`
+        const qrDiv = `<div id="${qrCodeContainerId}" class="d-flex justify-content-center"></div>`
             let qrElement = document.getElementById(qrCodeContainerId);
             if (qrElement) {
                  const jsonString = JSON.stringify(text);
@@ -110,7 +100,7 @@ export class PrebuiltPopup extends Component {
                     methodName: "QR",
                     totalAmount: parseFloat(this.state.total || 0.0),
                     currency: this.pos.currency?.name || "MMK",
-                    orderId: "test123",
+                    orderId: this.order?.name || "",
                     email: this.state.email || "",
                     customerPhone : this.state.phone || "",
                     customerName: this.state.customerName || "",
@@ -136,9 +126,8 @@ export class PrebuiltPopup extends Component {
 
                                                 //Show the qr code based on the result of payment
                                                 await this.generateQRCode(result);
-
-                                                //Start listening bus service to get the payment status from controller
-                                                this.subscribeToBusChannel();
+                                                await this.savePaymentStatus();
+                                                this.pollPaymentStatus(this.order.name);
                                             }).catch((error) => {
                                                 throw error;
                                             });
@@ -161,37 +150,53 @@ export class PrebuiltPopup extends Component {
         }
     }
 
-    subscribeToBusChannel() {
-        this.busService.addChannel(this.channelName);
-        this.busService.addEventListener("notification", this.onBusNotification);
-        console.log("Subscribed to Bus:", this.channelName);
+    async savePaymentStatus() {
+        const values = {
+           'merchant_order':this.order.name,
+           'provider_name': this.paymentMethodType,
+           'received_method':"QR",
+           'customer_name':this.state.customerName,
+           'total':parseFloat(this.state.total || 0.0),
+           'state':'draft',
+           // ... other fields to write
+       };
+       rpc("/pos/payment_status/create_draft", values);
     }
+    async pollPaymentStatus(merchantOrder) {
+        let continuePolling = true;
 
-    unsubscribeFromBusChannel() {
-        this.busService.deleteChannel(this.channelName);
-        this.busService.removeEventListener("notification", this.onBusNotification);
-        console.log("Unsubscribed from Bus:", this.channelName);
-    }
+        while (continuePolling) {
+            try {
+                console.log("Reading the status");
+                const results = await this.orm.call(
+                    'pos.payment.status',        // model
+                    'search_read',               // method
+                    [[['merchant_order', '=', merchantOrder]]],  // domain
+                    {limit: 1, order: 'paid_at desc'}            // kwargs
+                );
+                console.log("Order name is :",merchantOrder);
+                console.log("status is :",results);
 
+                if (results.length > 0) {
+                    const status = results[0];
 
-    onBusNotification({ detail: notifications }) {
-//        const notifications = event.detail;
-        console.log("Recive Noti: ");
-        for (const notification of notifications) {
-            const [channel, payload] = notification;
-            if (channel === this.channelName && payload?.status) {
-                console.log("Payment status received:", payload.status);
-                if (payload.status === "paid") {
-                    this.unsubscribeFromBusChannel();
-                    this.state.status = payload.status;
-                    this.props.close();
+                    if (status.state && status.state !== 'draft') {
+                        continuePolling = false;
+                        this.confirm();
+                    } else {
+                    // still draft, wait 3 seconds then retry
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    }
+                } else {
+                    // no record found, wait 3 seconds then retry
+                    await new Promise(resolve => setTimeout(resolve, 3000));
                 }
+            } catch (error) {
+                console.error('Polling error:', error);
+                await new Promise(resolve => setTimeout(resolve, 3000));
             }
         }
     }
-
-
-
 
     //Compose payload and call dinger pay method from python
     async confirm() {

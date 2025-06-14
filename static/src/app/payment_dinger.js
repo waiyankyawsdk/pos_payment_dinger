@@ -1,12 +1,8 @@
 import { _t } from "@web/core/l10n/translation";
 import { PaymentInterface } from "@point_of_sale/app/payment/payment_interface";
-import { ConfirmPopup } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { register_payment_method } from "@point_of_sale/app/store/pos_store";
-import { ConfirmationDialog, AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { PrebuiltPopup } from "@pos_payment_dinger/prebuilt_popup/prebuilt_popup";
 import { makeAwaitable } from "@point_of_sale/app/store/make_awaitable_dialog";
 import { sprintf } from "@web/core/utils/strings";
-import { loadJS } from "@web/core/assets";
 const { DateTime } = luxon;
 export class PaymentDinger extends PaymentInterface {
     setup() {
@@ -153,7 +149,7 @@ export class PaymentDinger extends PaymentInterface {
             order: order,
             line: line,
             uuid: uuid,
-            paymentMethodType: this.payment_method_id.name,
+            paymentMethodType: this.payment_method_id.journal_code,
             paymentMethodId:this.payment_method_id.id,
             token:token,
         },);
