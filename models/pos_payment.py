@@ -55,23 +55,6 @@ class PosPaymentMethod(models.Model):
             return base64.b64encode(cipher_text).decode()
 
     def make_payment(self, token, payload):
-
-        # Find the POS order by name
-        order = self.env['pos.order'].search([('name', '=', payload.get('orderId'))], limit=1)
-        if not order:
-            return {'error': 'Order not found'}
-
-        # Create payment status record
-        self.env['pos.payment.status'].create({
-            'reference':"test1",
-            'merchant_order': order.id,
-            'provider_name': payload.get('providerName'),
-            'received_method': payload.get('methodName'),
-            'customer_name': payload.get('customerName'),
-            'total': payload.get('totalAmount'),
-            'state': 'draft',  # or set based on your logic
-            'paid_at': fields.Datetime.now(),  # set if you have the date
-        })
         # token_value = token.get("response", {}).get("paymentToken")
 
         # self.public_key //need to assign this

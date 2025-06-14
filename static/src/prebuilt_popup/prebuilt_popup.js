@@ -1,10 +1,9 @@
-/** @odoo-module */
+import { Component, useState, useRef, useEffect } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { usePos } from "@point_of_sale/app/store/pos_hook";
 import { loadJS } from "@web/core/assets";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
-import { Component, useState ,onWillUnmount,onMounted} from "@odoo/owl";
 
 export class PrebuiltPopup extends Component {
     static template = "pos_payment_dinger.PrebuiltPopup";
@@ -17,10 +16,12 @@ export class PrebuiltPopup extends Component {
         paymentMethodId: Number,
         token: String,
         getPayload: Function,
-        title:String,
+        title: String,
         close: Function,
     };
+
     setup() {
+        this.qrCodeRef = useRef("qrCodeRef");
         this.orm = useService('orm');
         this.pos = usePos();
         this.order = this.props.order;
@@ -29,9 +30,10 @@ export class PrebuiltPopup extends Component {
         this.paymentMethodType = this.props.paymentMethodType;
         this.paymentMethodId = this.props.paymentMethodId;
         this.token = this.props.token;
-        this.countryCode="";
+        this.countryCode = "";
+        this._qrResult = null; // Store QR result for step 3
+
         const partner = this.props.order.get_partner?.() || {};
-        const payment_lines = this.order.paymentlines;
         const orderlines = this.order.get_orderlines?.() || [];
         const amount_total = this.order.getTotalDue?.() || 0.00;
         const safeNumber = this.safeNumber.bind(this);
@@ -40,24 +42,34 @@ export class PrebuiltPopup extends Component {
             paymentPaid: false,
             step: 1,
             customerName: partner.name,
-            clientId:partner.id,
+            clientId: partner.id,
             email: partner.email,
             phone: partner.phone,
             address: partner.contact_address,
             billCity: partner.city,
             state: partner.state_id?.name || "Yangon",
-            country: partner.country_id?.name || "Myanmar",//Here need to get the country code from dinger
+            country: partner.country_id?.name || "Myanmar",
             postalCode: partner.zip,
             paymentMethod: this.paymentMethodType,
-            total:amount_total,
+            total: amount_total,
             orderLines: orderlines.map(l => ({
                 product: l.product_id.display_name,
                 taxes: l.tax_ids,
-                discount:safeNumber(l.discount),
+                discount: safeNumber(l.discount),
                 price: safeNumber(l.price_unit),
                 quantity: l.qty,
             })),
         });
+
+        // Effect: generate QR code when step changes to 3 and _qrResult is set
+        useEffect(
+            () => {
+                if (this.state.step === 3 && this._qrResult) {
+                    this.generateQRCode(this._qrResult);
+                }
+            },
+            () => [this.state.step]
+        );
     }
 
     safeNumber(val) {
@@ -65,36 +77,36 @@ export class PrebuiltPopup extends Component {
     }
 
     async generateQRCode(text) {
-        await loadJS("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js");
-        // Create a container div for the QR code
-        const qrCodeContainerId = "dynamic_qr_code";
-        const qrDiv = `<div id="${qrCodeContainerId}" class="d-flex justify-content-center"></div>`
-            let qrElement = document.getElementById(qrCodeContainerId);
-            if (qrElement) {
-                 const jsonString = JSON.stringify(text);
-                 console.log(jsonString);
-                new QRCode(qrElement, {
-                    text: jsonString,  // Use token as QR data
-                    width: 150,
-                    height: 150
-                });
-            }
+//        await loadJS("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js");
+        await loadJS("/pos_payment_dinger/static/src/lib/qrcode.js");
+        const qrElement = this.qrCodeRef.el;
+        if (qrElement) {
+            const jsonString = JSON.stringify(text);
+            qrElement.innerHTML = '';
+            new QRCode(qrElement, {
+                text: jsonString,
+                width: 150,
+                height: 150
+            });
+        } else {
+            console.log("QR element is not found!");
+        }
     }
 
-    //Here need to create payload and silent call to diner pay method
-     async nextStep() {
+    async nextStep() {
         if (this.state.step < 3) {
-            if(this.state.step==2){
-                //Initiate to get the country code
+            if (this.state.step == 2) {
+                // Get country code
                 await this.pos.data.silentCall("pos.payment", "get_country_code", [
-                                            [this.paymentMethodId],
-                                            this.state.country,
-                                            ]).then((result) => {
-                                                this.countryCode=result;
-                                            }).catch((error) => {
-                                                throw error;
-                                           });
-                //Create Payload
+                    [this.paymentMethodId],
+                    this.state.country,
+                ]).then((result) => {
+                    this.countryCode = result;
+                }).catch((error) => {
+                    throw error;
+                });
+
+                // Create Payload
                 const payload = {
                     providerName: this.paymentMethodType,
                     methodName: "QR",
@@ -102,7 +114,7 @@ export class PrebuiltPopup extends Component {
                     currency: this.pos.currency?.name || "MMK",
                     orderId: this.order?.name || "",
                     email: this.state.email || "",
-                    customerPhone : this.state.phone || "",
+                    customerPhone: this.state.phone || "",
                     customerName: this.state.customerName || "",
                     state: this.state.state || "Yangon",
                     country: this.countryCode || "MM",
@@ -110,29 +122,28 @@ export class PrebuiltPopup extends Component {
                     billAddress: this.state.address || "No Address",
                     billCity: this.state.billCity || "Yangon",
                     items: JSON.stringify(this.state.orderLines.map(line => ({
-                                    name: line.product,
-                                    amount: (line.price).toFixed(2),
-                                    quantity: line.quantity.toString()
+                        name: line.product,
+                        amount: (line.price).toFixed(2),
+                        quantity: line.quantity.toString()
                     }))),
                 };
 
-                //Here initiate call to dinger with payload
+                // Call dinger with payload
                 await this.pos.data.silentCall("pos.payment", "make_payment", [
-                                            [this.paymentMethodId],  // Pass payment method ID
-                                            this.token,
-                                            payload,
-                                            ]).then(async (result) => {
-                                                this.state.step += 1;
-
-                                                //Show the qr code based on the result of payment
-                                                await this.generateQRCode(result);
-                                                await this.savePaymentStatus();
-                                                this.pollPaymentStatus(this.order.name);
-                                            }).catch((error) => {
-                                                throw error;
-                                            });
-            }
-            else{
+                    [this.paymentMethodId],
+                    this.token,
+                    payload,
+                ]).then(async (result) => {
+                    if (result) {
+                        this._qrResult = result; // Store for useEffect
+                        this.state.step += 1;    // Triggers QR code generation in useEffect
+                        await this.savePaymentStatus();
+                        this.pollPaymentStatus(this.order.name);
+                    }
+                }).catch((error) => {
+                    throw error;
+                });
+            } else {
                 this.state.step += 1;
             }
         }
@@ -143,62 +154,52 @@ export class PrebuiltPopup extends Component {
             this.state.step -= 1;
         }
     }
+
     onStepClick = (stepNumber) => {
         if (stepNumber < this.state.step) {
             this.state.step = stepNumber;
-            console.log(stepNumber);
         }
     }
 
     async savePaymentStatus() {
         const values = {
-           'merchant_order':this.order.name,
-           'provider_name': this.paymentMethodType,
-           'received_method':"QR",
-           'customer_name':this.state.customerName,
-           'total':parseFloat(this.state.total || 0.0),
-           'state':'draft',
-           // ... other fields to write
-       };
-       rpc("/pos/payment_status/create_draft", values);
+            'merchant_order': this.order.name,
+            'provider_name': this.paymentMethodType,
+            'received_method': "QR",
+            'customer_name': this.state.customerName,
+            'total': parseFloat(this.state.total || 0.0),
+            'state': 'draft',
+        };
+        rpc("/pos/payment_status/create_draft", values);
     }
+
     async pollPaymentStatus(merchantOrder) {
         let continuePolling = true;
-
         while (continuePolling) {
             try {
-                console.log("Reading the status");
                 const results = await this.orm.call(
-                    'pos.payment.status',        // model
-                    'search_read',               // method
-                    [[['merchant_order', '=', merchantOrder]]],  // domain
-                    {limit: 1, order: 'paid_at desc'}            // kwargs
+                    'pos.payment.status',
+                    'search_read',
+                    [[['merchant_order', '=', merchantOrder]]],
+                    { limit: 1, order: 'paid_at desc' }
                 );
-                console.log("Order name is :",merchantOrder);
-                console.log("status is :",results);
-
                 if (results.length > 0) {
                     const status = results[0];
-
                     if (status.state && status.state !== 'draft') {
                         continuePolling = false;
                         this.confirm();
                     } else {
-                    // still draft, wait 3 seconds then retry
-                    await new Promise(resolve => setTimeout(resolve, 3000));
+                        await new Promise(resolve => setTimeout(resolve, 3000));
                     }
                 } else {
-                    // no record found, wait 3 seconds then retry
                     await new Promise(resolve => setTimeout(resolve, 3000));
                 }
             } catch (error) {
-                console.error('Polling error:', error);
                 await new Promise(resolve => setTimeout(resolve, 3000));
             }
         }
     }
 
-    //Compose payload and call dinger pay method from python
     async confirm() {
         this.props.getPayload(this.state);
         this.props.close();

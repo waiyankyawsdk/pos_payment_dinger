@@ -156,7 +156,6 @@ export class PaymentDinger extends PaymentInterface {
         //        this.validateOrder(true);
         return payload_result;
     }
-
     waitForPaymentConfirmation(order,line) {
         return new Promise((resolve) => {
             this.paymentLineResolvers[this.pending_dinger_line().uuid] = resolve;
