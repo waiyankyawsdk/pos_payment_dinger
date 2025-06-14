@@ -28,7 +28,6 @@ export class PaymentDinger extends PaymentInterface {
 //        var data = this._dinger_pay_data();
         var line = order.payment_ids.find((paymentLine) => paymentLine.uuid === uuid);
 
-
         this.processPayment(this.selectedMethod,"test",line,uuid,order);
 
         /* For testing
@@ -156,6 +155,7 @@ export class PaymentDinger extends PaymentInterface {
         //        this.validateOrder(true);
         return payload_result;
     }
+    
     waitForPaymentConfirmation(order,line) {
         return new Promise((resolve) => {
             this.paymentLineResolvers[this.pending_dinger_line().uuid] = resolve;

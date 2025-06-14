@@ -21,11 +21,7 @@
             '/pos_payment_dinger/static/src/app/payment_dinger.js',
             '/pos_payment_dinger/static/src/app/screens/payment_screen/payment_screen.xml',
             '/pos_payment_dinger/static/src/app/screens/payment_screen/payment_screen.scss',
-            # '/pos_payment_dinger/static/src/lib/qrcode.min.js',
         ],
-        # 'web.assets_backend': [
-        #
-        # ],
     },
     "license": "LGPL-3",
     "installable": True,
