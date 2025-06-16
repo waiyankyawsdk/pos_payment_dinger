@@ -2,7 +2,7 @@
 This module defines the PaymentStatus model, which is used to
 store the status information from the Dinger payment callback.
 """
-from odoo import fields, models,api
+from odoo import fields, models
 
 from ..dataclasses.datamodels import JournalCodeEnum, TransactionStatusEnum
 
@@ -21,11 +21,13 @@ class PaymentStatus(models.Model):
     """
     _name = "pos.payment.status"
     _description = "To store the status information from the dinger payment call back"
+    _rec_name = "merchant_order"
 
 
     # That is transaction id from dinger
     reference = fields.Char(string="Reference")
-    merchant_order = fields.Char(
+    merchant_order = fields.Many2one(
+        comodel_name="pos.order",
         string="Merchant Order",
         help="Reference to the POS order associated with this payment status.",
     )

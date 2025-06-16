@@ -5,7 +5,15 @@ from odoo.tools.float_utils import float_compare
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
+    #overrride
     def _create_combine_account_payment(self, payment_method, amounts, diff_amount):
+        #Here need to check payment method is dinger
+        #if dinger continue to work my override process
+        #else call to the existing parent method
+        if payment_method.use_payment_terminal != "dinger":
+            return super()._create_combine_account_payment(payment_method, amounts, diff_amount)
+
+
         # Call original logic - or copy original method's code and add below
         outstanding_account = payment_method.outstanding_account_id
         destination_account = self._get_receivable_account(payment_method)

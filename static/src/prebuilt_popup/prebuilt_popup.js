@@ -22,6 +22,7 @@ export class PrebuiltPopup extends Component {
 
     setup() {
         this.qrCodeRef = useRef("qrCodeRef");
+        this._qrResult = null; // Store QR result for step 3
         this.orm = useService('orm');
         this.pos = usePos();
         this.order = this.props.order;
@@ -31,7 +32,6 @@ export class PrebuiltPopup extends Component {
         this.paymentMethodId = this.props.paymentMethodId;
         this.token = this.props.token;
         this.countryCode = "";
-        this._qrResult = null; // Store QR result for step 3
 
         const partner = this.props.order.get_partner?.() || {};
         const orderlines = this.order.get_orderlines?.() || [];
@@ -76,8 +76,8 @@ export class PrebuiltPopup extends Component {
         return (val === null || val === false || val === "" || (Array.isArray(val) && val.length === 0)) ? 0.00 : val;
     }
 
+    // Process to convert text to qr code and show in the qrElement
     async generateQRCode(text) {
-//        await loadJS("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js");
         await loadJS("/pos_payment_dinger/static/src/lib/qrcode.js");
         const qrElement = this.qrCodeRef.el;
         if (qrElement) {
@@ -161,6 +161,7 @@ export class PrebuiltPopup extends Component {
         }
     }
 
+    //By using rpc call to main method to write the data with draft state
     async savePaymentStatus() {
         const values = {
             'merchant_order': this.order.name,
@@ -173,6 +174,7 @@ export class PrebuiltPopup extends Component {
         rpc("/pos/payment_status/create_draft", values);
     }
 
+    //Poll status from pos_payment_status.py by searching the line with merchant_order field to get the status value
     async pollPaymentStatus(merchantOrder) {
         let continuePolling = true;
         while (continuePolling) {

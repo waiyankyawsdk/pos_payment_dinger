@@ -4,7 +4,7 @@
     "version": "1.0",
     "author": "Aung Moe Wai",
     "summary": "Modifying the existing view to new design changing.",
-    "description": " ",  # Non-empty string to avoid loading the README file.
+    "description": "To serve an online payment prvider in pos to use myanmar banking with QR only",
     "depends": ["base", "web", "point_of_sale"],
     "data": [
         'views/pos_payment_method_views.xml',

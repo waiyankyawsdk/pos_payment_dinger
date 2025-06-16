@@ -25,38 +25,45 @@ export class PaymentDinger extends PaymentInterface {
             window.alert("Cannot process transactions with negative amount.")
             return Promise.resolve();
         }
-//        var data = this._dinger_pay_data();
+        var data = this._dinger_pay_data();
         var line = order.payment_ids.find((paymentLine) => paymentLine.uuid === uuid);
-
-        this.processPayment(this.selectedMethod,"test",line,uuid,order);
-
-        /* For testing
+       
         //Start call token
         this._call_dinger(data).then((response) => {
-         // This will log the resolved JSON result
+            // Check the token response is success or not.
             if(response.message == 'Authentication Success'){
-
-               // Process to show popup for the prebuilt checkout form
-               this.processPayment(this.selectedMethod,response,line,uuid,order);
+                // After getting the token, we can proceed with the payment
+                // Process to show popup for the prebuilt checkout form
+                this.processPayment(this.selectedMethod,response,line,uuid,order);
             }
             else{
                 return false;
             }
-         }).catch((error) => {
-            console.error("Error fetching token:", error);
-         });
-         */
+        }).catch((error) => {
+           console.error("Error fetching token:", error);
+        });
+    }
+
+    //  This method is get the token of the dinger.
+    _call_dinger(data, operation = false) {
+        return this.pos.data
+            .silentCall("pos.payment", "dinger_connection_token", [])
+            .then((result) => {
+                return result;  // Ensure the function returns the resolved response
+            })
+            .catch((error) => {
+                console.error("Dinger API Call Failed:", error);
+                return Promise.reject(error);
+            });
     }
 
     // This method is parse value to show checkout form
     async processPayment(selectedMethod,respone_token,line,uuid,order) {
         if (selectedMethod != '') {
-            this._call_dinger_payment(respone_token,selectedMethod, line,uuid).then((response_pay) => {
-//                if(response_pay.message == 'Request Success'){
-//                    line.set_payment_status("done");
-//                    return this.waitForPaymentConfirmation(line,order);
-//                }
+            this._call_dinger_payment(selectedMethod,respone_token, line,uuid).then((response_pay) => {
                     if (typeof response_pay !== 'undefined' && response_pay) {
+
+                        //If payment of response pay have data, it make the payment is done and set the current order line to done
                         line.set_payment_status("done");
                         return this.waitForPaymentConfirmation(line, order);
                     } else {
@@ -69,6 +76,24 @@ export class PaymentDinger extends PaymentInterface {
         } else {
             console.log("Invalid payment method");
         }
+    }
+
+    //Start show the prebuilt dialog box
+    async _call_dinger_payment(payment_method_type,token, line,uuid){
+        line.payment_type=payment_method_type;
+        const order = this.pos.get_order();
+
+        //Start show the prebuilt form
+        const payload_result = await makeAwaitable(this.dialog, PrebuiltPopup, {
+            title: _t("Custom Popup!"),
+            order: order,
+            line: line,
+            uuid: uuid,
+            paymentMethodType: this.payment_method_id.journal_code,
+            paymentMethodId:this.payment_method_id.id,
+            token:token,
+        },);
+        return payload_result;
     }
 
     _dinger_get_sale_id() {
@@ -125,36 +150,6 @@ export class PaymentDinger extends PaymentInterface {
             POIID: this.payment_method_id.dinger_terminal_identifier,
         };
     }
-
-//  This method is get the token of the dinger.
-    _call_dinger(data, operation = false) {
-        return this.pos.data
-            .silentCall("pos.payment", "dinger_connection_token", [])
-            .then((result) => {
-                return result;  // Ensure the function returns the resolved response
-            })
-            .catch((error) => {
-                console.error("Dinger API Call Failed:", error);
-                return Promise.reject(error);
-            });
-    }
-
-    async _call_dinger_payment(token,payment_method_type, line,uuid){
-        line.payment_type=payment_method_type;
-        const order = this.pos.get_order();
-
-        const payload_result = await makeAwaitable(this.dialog, PrebuiltPopup, {
-            title: _t("Custom Popup!"),
-            order: order,
-            line: line,
-            uuid: uuid,
-            paymentMethodType: this.payment_method_id.journal_code,
-            paymentMethodId:this.payment_method_id.id,
-            token:token,
-        },);
-        //        this.validateOrder(true);
-        return payload_result;
-    }
     
     waitForPaymentConfirmation(order,line) {
         return new Promise((resolve) => {
@@ -162,7 +157,6 @@ export class PaymentDinger extends PaymentInterface {
         });
     }
 
-    //-------------------------------------------------------------------------------------------------------------------------------------
     //Make canceable for for the retry condition by clicking on the red cross button
     async send_payment_cancel(order, uuid) {
         /**
@@ -189,6 +183,4 @@ export class PaymentDinger extends PaymentInterface {
             return true;
         }
     }
-    //------------------------------------------------------------------------------------------------------------------
-
 }
