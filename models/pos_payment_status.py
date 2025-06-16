@@ -23,7 +23,6 @@ class PaymentStatus(models.Model):
     _description = "To store the status information from the dinger payment call back"
     _rec_name = "merchant_order"
 
-
     # That is transaction id from dinger
     reference = fields.Char(string="Reference")
     merchant_order = fields.Many2one(

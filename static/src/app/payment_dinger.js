@@ -90,6 +90,7 @@ export class PaymentDinger extends PaymentInterface {
             line: line,
             uuid: uuid,
             paymentMethodType: this.payment_method_id.journal_code,
+            paymentMethodName:this.payment_method_id.name,
             paymentMethodId:this.payment_method_id.id,
             token:token,
         },);

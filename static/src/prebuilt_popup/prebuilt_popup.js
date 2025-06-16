@@ -29,6 +29,7 @@ export class PrebuiltPopup extends Component {
         this.line = this.props.line;
         this.uuid = this.props.uuid;
         this.paymentMethodType = this.props.paymentMethodType;
+        this.paymentMethodName=this.paymentMethodName;
         this.paymentMethodId = this.props.paymentMethodId;
         this.token = this.props.token;
         this.countryCode = "";
