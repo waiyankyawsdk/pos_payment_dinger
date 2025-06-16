@@ -47,7 +47,7 @@ export class PaymentDinger extends PaymentInterface {
     //  This method is get the token of the dinger.
     _call_dinger(data, operation = false) {
         return this.pos.data
-            .silentCall("pos.payment", "dinger_connection_token", [])
+            .silentCall("pos.payment", "dinger_connection_token", [this.payment_method_id.id])
             .then((result) => {
                 return result;  // Ensure the function returns the resolved response
             })
@@ -90,7 +90,6 @@ export class PaymentDinger extends PaymentInterface {
             line: line,
             uuid: uuid,
             paymentMethodType: this.payment_method_id.journal_code,
-            paymentMethodName:this.payment_method_id.name,
             paymentMethodId:this.payment_method_id.id,
             token:token,
         },);

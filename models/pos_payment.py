@@ -17,6 +17,8 @@ class PosPaymentMethod(models.Model):
         if not (payment_method.project_name and payment_method.client_id and payment_method.merchant_name):
             raise ValidationError(_("Dinger credentials are not set on this payment method."))
 
+        print("Dinger Credential of Project Name is :",payment_method.project_name)
+
         url = "https://staging.dinger.asia/payment-gateway-uat/api/token"
         params = {
             "projectName": payment_method.project_name,  # self.project_name,

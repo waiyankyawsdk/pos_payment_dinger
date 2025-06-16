@@ -2,9 +2,9 @@
 {
     "name": "Point Of Sale",
     "version": "1.0",
-    "author": "Aung Moe Wai",
-    "summary": "Modifying the existing view to new design changing.",
-    "description": "To serve an online payment prvider in pos to use myanmar banking with QR only",
+    "author": "SMEI",
+    "summary": "Integrate Dinger QR payment with Odoo POS for seamless Myanmar digital payments.",
+    "description": "This module enables Odoo POS to accept payments via Dinger QR, allowing customers to pay easily using Myanmar digital wallets and banks. It provides a smooth integration for QR-based transactions, automatic payment status tracking, and is designed for businesses operating in Myanmar.",
     "depends": ["base", "web", "point_of_sale"],
     "data": [
         'views/pos_payment_method_views.xml',
