@@ -1,7 +1,5 @@
 import requests
-import base64
 import json
-from Crypto.Cipher import PKCS1_v1_5
 from odoo import models, api, _
 from odoo.exceptions import ValidationError, AccessError
 from .encryption import EncryptRSA
@@ -16,8 +14,6 @@ class PosPaymentMethod(models.Model):
         payment_method.ensure_one()
         if not (payment_method.project_name and payment_method.client_id and payment_method.merchant_name):
             raise ValidationError(_("Dinger credentials are not set on this payment method."))
-
-        print("Dinger Credential of Project Name is :",payment_method.project_name)
 
         url = "https://staging.dinger.asia/payment-gateway-uat/api/token"
         params = {
