@@ -25,8 +25,7 @@ class PaymentStatus(models.Model):
 
     # That is transaction id from dinger
     reference = fields.Char(string="Reference")
-    merchant_order = fields.Many2one(
-        comodel_name="pos.order",
+    merchant_order = fields.Char(
         string="Merchant Order",
         help="Reference to the POS order associated with this payment status.",
     )

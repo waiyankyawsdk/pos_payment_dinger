@@ -1,8 +1,9 @@
 import json
 from odoo import http
 from datetime import datetime
-from odoo.http import request,route
+from odoo.http import request, route
 from odoo import fields
+
 from .decryption_aes_ecb_pkcs7padding import decrypt
 
 
@@ -11,8 +12,9 @@ def convert_paid_at(date_str: str) -> str:
     """Convert the date string from Dinger format to Odoo format."""
     return datetime.strptime(date_str, "%Y%m%d %H%M%S").strftime("%Y-%m-%d %H:%M:%S")
 
+
 class PosOrderController(http.Controller):
-    _webhook_url='/pos/order/dinger_payment_method'
+    _webhook_url = '/pos/order/dinger_payment_method'
 
     # Here dinger make return url and need to modify prebuilt_popup of qr image with check mark
     @route(_webhook_url, type="http", auth="none", csrf=False, methods=["POST"])
@@ -40,28 +42,25 @@ class PosOrderController(http.Controller):
         method_name = result.get('methodName')
         customer_name = result.get('customerName')
 
-        # Find the POS order
-        pos_order = request.env['pos.order'].sudo().search([('name', '=', merchant_order)], limit=1)
-        if pos_order:
-            # Find the payment status record for this order
-            payment_status = request.env['pos.payment.status'].sudo().search([('merchant_order', '=', pos_order.id)], limit=1)
-            if payment_status:
-                payment_status.state = status  # Update the status field
-                payment_status.reference = transaction  # Update the reference field
-                payment_status.paid_at=convert_paid_at(created_at)
-            else:
-                # Optionally, create a new record if not found
-                 request.env['pos.payment.status'].sudo().create({
-                    'reference':transaction,
-                    'merchant_order': pos_order.id,
-                    'provider_name': provider_name,
-                    'received_method': method_name,
-                    'customer_name': customer_name,
-                    'total': total_amount,
-                    'state': status,
-                    'paid_at': convert_paid_at(created_at),
-                })
-
+        # Find the payment status record for this order
+        payment_status = request.env['pos.payment.status'].sudo().search([('merchant_order', '=', merchant_order)],
+                                                                         limit=1)
+        if payment_status:
+            payment_status.state = status  # Update the status field
+            payment_status.reference = transaction  # Update the reference field
+            payment_status.paid_at = convert_paid_at(created_at) #Update the datetime
+        else:
+            # Optionally, create a new record if not found
+            request.env['pos.payment.status'].sudo().create({
+                'reference': transaction,
+                'merchant_order': merchant_order,
+                'provider_name': provider_name,
+                'received_method': method_name,
+                'customer_name': customer_name,
+                'total': total_amount,
+                'state': status,
+                'paid_at': convert_paid_at(created_at),
+            })
         return {'result': 'Live data sent successfully'}
 
     # Start write to pos.payment.status for the sale order line with draft state
@@ -75,18 +74,15 @@ class PosOrderController(http.Controller):
         state = kwargs.get('state')
         total = kwargs.get('total')
 
-        pos_order = request.env['pos.order'].sudo().search([('name', '=', merchant_order)], limit=1)
-        if pos_order:
-
-            # Here directly creating is not safe
-            # It should be search if not found create new
-            record = request.env['pos.payment.status'].sudo().create({
-                'merchant_order': pos_order.id,
-                'provider_name': provider_name,
-                'received_method':received_method,
-                'customer_name': customer_name,
-                'total': total,
-                'state': state,
-                'paid_at': fields.Datetime.now(),
-            })
+        # Here directly creating is not safe
+        # It should be search if not found create new
+        record = request.env['pos.payment.status'].sudo().create({
+            'merchant_order': merchant_order,
+            'provider_name': provider_name,
+            'received_method': received_method,
+            'customer_name': customer_name,
+            'total': total,
+            'state': state,
+            'paid_at': fields.Datetime.now(),
+        })
         return {'result': 'success', 'id': record.id}
