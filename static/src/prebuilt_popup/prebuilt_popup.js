@@ -165,12 +165,13 @@ export class PrebuiltPopup extends Component {
     //By using rpc call to main method to write the data with draft state
     async savePaymentStatus() {
         const values = {
-            'merchant_order': this.order.name,
-            'provider_name': this.paymentMethodType,
-            'received_method': "QR",
-            'customer_name': this.state.customerName,
-            'total': parseFloat(this.state.total || 0.0),
-            'state': 'draft',
+            'merchantOrderId': this.order.name,
+            'transactionId':"",
+            'providerName': this.paymentMethodType,
+            'methodName': "QR",
+            'customerName': this.state.customerName,
+            'totalAmount': parseFloat(this.state.total || 0.0),
+            'transactionStatus': 'draft',
         };
         rpc("/pos/payment_status/create_draft", values);
     }
