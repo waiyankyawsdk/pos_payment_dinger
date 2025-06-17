@@ -25,11 +25,10 @@ export class PaymentDinger extends PaymentInterface {
             window.alert("Cannot process transactions with negative amount.")
             return Promise.resolve();
         }
-        var data = this._dinger_pay_data();
         var line = order.payment_ids.find((paymentLine) => paymentLine.uuid === uuid);
        
         //Start call token
-        this._call_dinger(data).then((response) => {
+        this._call_dinger().then((response) => {
             // Check the token response is success or not.
             if(response.message == 'Authentication Success'){
                 // After getting the token, we can proceed with the payment
@@ -45,7 +44,7 @@ export class PaymentDinger extends PaymentInterface {
     }
 
     //  This method is get the token of the dinger.
-    _call_dinger(data, operation = false) {
+    _call_dinger() {
         return this.pos.data
             .silentCall("pos.payment", "dinger_connection_token", [this.payment_method_id.id])
             .then((result) => {
@@ -65,7 +64,6 @@ export class PaymentDinger extends PaymentInterface {
 
                         //If payment of response pay have data, it make the payment is done and set the current order line to done
                         line.set_payment_status("done");
-                        return this.waitForPaymentConfirmation(line, order);
                     } else {
                         console.warn("No payload returned from Dinger popup.");
                     }
@@ -96,66 +94,6 @@ export class PaymentDinger extends PaymentInterface {
         return payload_result;
     }
 
-    _dinger_get_sale_id() {
-        var config = this.pos.config;
-        return sprintf("%s (ID: %s)", config.display_name, config.id);
-    }
-
-    set_most_recent_service_id(id) {
-        this.most_recent_service_id = id;
-    }
-    pending_dinger_line() {
-        return this.pos.getPendingPaymentLine("dinger");
-    }
-
-    _dinger_pay_data() {
-        var order = this.pos.get_order();
-        var config = this.pos.config;
-        var line = order.get_selected_paymentline();
-        var data = {
-            SaleToPOIRequest: {
-                MessageHeader: Object.assign(this._dinger_common_message_header(), {
-                    MessageCategory: "Payment",
-                }),
-                PaymentRequest: {
-                    SaleData: {
-                        SaleTransactionID: {
-                            TransactionID: `${order.uuid}--${order.session_id.id}`,
-                            TimeStamp: DateTime.now().toFormat("yyyy-MM-dd'T'HH:mm:ssZZ"), // iso format: '2018-01-10T11:30:15+00:00'
-                        },
-                    },
-                    PaymentTransaction: {
-                        AmountsReq: {
-                            Currency: this.pos.currency.name,
-                            RequestedAmount: line.amount,
-                        },
-                    },
-                },
-            },
-        };
-        return data;
-    }
-
-    _dinger_common_message_header() {
-        var config = this.pos.config;
-        this.most_recent_service_id = Math.floor(Math.random() * Math.pow(2, 64)).toString(); // random ID to identify request/response pairs
-        this.most_recent_service_id = this.most_recent_service_id.substring(0, 10); // max length is 10
-
-        return {
-            ProtocolVersion: "3.0",
-            MessageClass: "Service",
-            MessageType: "Request",
-            SaleID: this._dinger_get_sale_id(config),
-            ServiceID: this.most_recent_service_id,
-            POIID: this.payment_method_id.dinger_terminal_identifier,
-        };
-    }
-    
-    waitForPaymentConfirmation(order,line) {
-        return new Promise((resolve) => {
-            this.paymentLineResolvers[this.pending_dinger_line().uuid] = resolve;
-        });
-    }
 
     //Make canceable for for the retry condition by clicking on the red cross button
     async send_payment_cancel(order, uuid) {

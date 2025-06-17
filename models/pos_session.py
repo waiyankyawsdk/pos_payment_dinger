@@ -82,7 +82,7 @@ class PosSession(models.Model):
 
             # Add new line for total_difference on suspense account
             self.env['account.move.line'].create({
-                'name': _('Cash Difference'),
+                'name': _('Bank Transaction Charge Cost'),
                 'move_id': account_payment.move_id.id,
                 'account_id': journal.suspense_account_id.id,
                 'debit': total_difference if outstanding_line.debit else 0.0,
