@@ -77,9 +77,17 @@ export class PaymentDinger extends PaymentInterface {
     }
 
     //Start show the prebuilt dialog box
-    async _call_dinger_payment(payment_method_type,token, line,uuid){
+    async _call_dinger_payment(payment_method_type,tokenResponseJson, line,uuid){
         line.payment_type=payment_method_type;
         const order = this.pos.get_order();
+
+        let paymentToken = "";
+        try {
+            const parsed = typeof tokenResponseJson === "string" ? JSON.parse(tokenResponseJson) : tokenResponseJson;
+            paymentToken = parsed?.response?.paymentToken || "";
+        } catch (error) {
+            console.error("Failed to parse token response JSON:", error);
+        }
 
         //Start show the prebuilt form
         const payload_result = await makeAwaitable(this.dialog, PrebuiltPopup, {
@@ -89,7 +97,7 @@ export class PaymentDinger extends PaymentInterface {
             uuid: uuid,
             paymentMethodType: this.payment_method_id.journal_code,
             paymentMethodId:this.payment_method_id.id,
-            token:token,
+            token:paymentToken,
         },);
         return payload_result;
     }

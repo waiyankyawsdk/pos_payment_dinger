@@ -172,6 +172,7 @@ export class PrebuiltPopup extends Component {
             'customerName': this.state.customerName,
             'totalAmount': parseFloat(this.state.total || 0.0),
             'transactionStatus': 'draft',
+            'createdAt':'20250618 105033'
         };
         rpc("/pos/payment_status/create_draft", values);
     }

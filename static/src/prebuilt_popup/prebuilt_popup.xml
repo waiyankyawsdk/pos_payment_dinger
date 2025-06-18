@@ -139,7 +139,7 @@
 
               <!-- Step 3: QR Payment -->
               <div t-if="state.step === 3">
-                <h5 class="text-center">Scan with <span><t t-esc="state.paymentMethodName"/></span></h5>
+                <h5 class="text-center">Scan with <span><t t-esc="state.paymentMethod"/></span></h5>
                 <div class="d-flex flex-column align-items-center justify-content-center" style="min-height:220px;">
                   <div t-ref="qrCodeRef" class="qr-code-container"></div>
                   <p class="mt-2 fw-bold text-center"><t t-esc="state.total"/> </p>

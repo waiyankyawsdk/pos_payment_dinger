@@ -12,17 +12,20 @@ class PosPaymentMethod(models.Model):
     def _get_dinger_auth_token(self,payment_method_id):
         payment_method = self.env['pos.payment.method'].browse(payment_method_id)
         payment_method.ensure_one()
-        if not (payment_method.project_name and payment_method.client_id and payment_method.merchant_name):
+
+        if not (payment_method.project_name and payment_method.merchant_key and payment_method.merchant_name):
             raise ValidationError(_("Dinger credentials are not set on this payment method."))
 
         url = "https://staging.dinger.asia/payment-gateway-uat/api/token"
         params = {
             "projectName": payment_method.project_name,  # self.project_name,
-            "apiKey": payment_method.client_id,  # self.api_key,
-            "merchantName": payment_method.merchant_name,  # self.merchant_key
+            "apiKey": payment_method.merchant_key,  # self.api_key,
+            "merchantName": payment_method.merchant_name,  # self.merchant_name
         }
         response = requests.get(url, params=params)
+        print("Response is :", response)
         if response.status_code == 200:
+            print("Response is :",response)
             return response.json()
         return None
 
@@ -40,7 +43,6 @@ class PosPaymentMethod(models.Model):
         return None
 
     def make_payment(self, token, payload):
-        token_value = token.get("response", {}).get("paymentToken")
 
         # Prepare payload as dict if it's a JSON string
         if isinstance(payload, str):
@@ -60,7 +62,7 @@ class PosPaymentMethod(models.Model):
         #Here need to change to production pay url 
         url = "https://staging.dinger.asia/payment-gateway-uat/api/pay"
         headers = {
-            "Authorization": f"Bearer {token_value}"
+            "Authorization": f"Bearer {token}"
         }
         files = {
             'payload': encrypted_payload
@@ -71,11 +73,13 @@ class PosPaymentMethod(models.Model):
         return False
 
     @api.model
-    def dinger_connection_token(self,payment_method_id):
+    def dinger_connection_token(self, payment_method_id):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
-            raise AccessError(_("Do not have access to fetch token from Diniger"))
-        # Implement payment payload send.
+            raise AccessError(_("You do not have access to fetch token from Dinger"))
         data = self._get_dinger_auth_token(payment_method_id)
+
         if not data:
             raise ValidationError(_('Complete the Dinger onboarding for company %s.', self.env.company.name))
+
         return data
+
