@@ -91,7 +91,7 @@ export class PaymentDinger extends PaymentInterface {
         }
 
         //Start show the prebuilt form
-        const paymentToken =token.response.paymentToken ;
+        paymentToken =token.response.paymentToken ;
         const payload_result = await makeAwaitable(this.dialog, PrebuiltPopup, {
             title: _t("Custom Popup!"),
             order: order,
