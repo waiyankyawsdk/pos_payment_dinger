@@ -46,7 +46,7 @@ export class PaymentDinger extends PaymentInterface {
     //  This method is get the token of the dinger.
     _call_dinger() {
         return this.pos.data
-            .silentCall("pos.payment", "dinger_connection_token", [this.payment_method_id.id])
+            .silentCall("pos.payment", "dinger_connection_token", [])
             .then((result) => {
                 return result;  // Ensure the function returns the resolved response
             })
@@ -80,6 +80,7 @@ export class PaymentDinger extends PaymentInterface {
     async _call_dinger_payment(payment_method_type,tokenResponseJson, line,uuid){
         line.payment_type=payment_method_type;
         const order = this.pos.get_order();
+        console.log("Payment Token is :",token);
 
         let paymentToken = "";
         try {
@@ -90,6 +91,7 @@ export class PaymentDinger extends PaymentInterface {
         }
 
         //Start show the prebuilt form
+        const paymentToken =token.response.paymentToken ;
         const payload_result = await makeAwaitable(this.dialog, PrebuiltPopup, {
             title: _t("Custom Popup!"),
             order: order,

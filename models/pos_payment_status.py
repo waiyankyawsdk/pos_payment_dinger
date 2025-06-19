@@ -4,7 +4,7 @@ store the status information from the Dinger payment callback.
 """
 from odoo import fields, models
 
-from ..dataclasses.datamodels import JournalCodeEnum, TransactionStatusEnum
+from ...dinger_mixin.dataclasses.datamodels import JournalCodeEnum, TransactionStatusEnum
 
 
 class PaymentStatus(models.Model):

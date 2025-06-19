@@ -1,8 +1,7 @@
 # coding: utf-8
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields, models, api
-from odoo.exceptions import UserError
-from ..dataclasses.datamodels import JournalCodeEnum
+from ...dinger_mixin.dataclasses.datamodels import JournalCodeEnum
 
 
 class PosPaymentMethod(models.Model):
@@ -90,4 +89,3 @@ class PosPaymentMethod(models.Model):
         params = super()._load_pos_data_fields(config_id)
         params += ['parent_payment_method_name','project_name','public_key','merchant_name','merchant_key','client_id','secret_key','journal_code']
         return params
-            
