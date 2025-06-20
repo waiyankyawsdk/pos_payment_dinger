@@ -4,8 +4,6 @@ from datetime import datetime
 from odoo.http import request, route
 from odoo import fields
 
-from .decryption_aes_ecb_pkcs7padding import decrypt
-
 
 @staticmethod
 def convert_paid_at(date_str: str) -> str:
@@ -60,7 +58,7 @@ class PosOrderController(http.Controller):
         check_sum = post.get('checksum')
 
         # Decrypt the payment result
-        decrypted_str = decrypt(self.secret_key, payment_result)
+        decrypted_str = request.env['pos.payment'].aes_decrypt(payment_result)
 
         try:
             result = json.loads(decrypted_str)

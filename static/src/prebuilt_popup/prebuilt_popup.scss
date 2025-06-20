@@ -1,10 +1,13 @@
-.list-unstyled li {
-  margin-bottom: 1rem;
+.list-unstyled {
+  li {
+    margin-bottom: 1rem;
 
+    a {
+      text-decoration: none;
+    }
+  }
 }
-.list-unstyled li a {
-  text-decoration: none;
-}
+
 .fw-bold {
   font-weight: bold;
 }
@@ -24,31 +27,39 @@
   cursor: pointer;
 }
 
-.active-step .step-circle {
-  border-color: #000;
+.active-step {
+  .step-circle {
+    border-color: #000;
+  }
 }
 
 .completed-step:hover {
   text-decoration: none;
 }
+
 /* For the horizontal line beside the step */
-.horizontal_line{
-    margin-top:30px;
-    border:1px solid #D9D9D9;
-    background:#D9D9D9;
-    width:2px;
-    height:200px;
+.horizontal-line {
+  margin-top: 30px;
+  border: 1px solid #D9D9D9;
+  background: #D9D9D9;
+  width: 2px;
+  height: 200px;
 }
+
 /* For order information page */
 .logo-info-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-.left-logo img {
-    height: 80px;
-}
-.right-info {
-    margin-left:30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  .left-logo {
+    img {
+      height: 80px;
+    }
+  }
+
+  .right-info {
+    margin-left: 30px;
     text-align: left;
+  }
 }

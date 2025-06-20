@@ -6,20 +6,10 @@
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='use_payment_terminal']" position="after">
-                <!-- Dinger -->
-                <field name="description" readonly="True" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
-                <field name="project_name" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
-                <field name="public_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
-                <field name="merchant_name" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
-                <field name="merchant_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
-                <field name="client_id" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
-                <field name="secret_key" invisible="use_payment_terminal != 'dinger'" required="use_payment_terminal == 'dinger'"/>
-            </xpath>
-            <xpath expr="//field[@name='company_id']" position="after">
-                <field name="parent_method_id" invisible="is_parent" domain="[('is_parent', '=', True)]"/>
-                <field name="parent_payment_method_name" invisible="is_parent"/>
-                <field name="is_parent" invisible="parent_method_id!=False"/>
-                <field name="journal_code" invisible="is_parent"/>
+                <field name="parent_method_id" invisible="use_payment_terminal != 'dinger'" domain="[('is_parent', '=', True)]" />
+                <field name="parent_payment_method_name" invisible="use_payment_terminal != 'dinger'"/>
+                <field name="is_parent" invisible="use_payment_terminal != 'dinger'"/>
+                <field name="journal_code" invisible="use_payment_terminal != 'dinger'"/>
             </xpath>
         </field>
     </record>

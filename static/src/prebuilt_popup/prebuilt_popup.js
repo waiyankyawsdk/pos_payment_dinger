@@ -29,10 +29,11 @@ export class PrebuiltPopup extends Component {
         this.line = this.props.line;
         this.uuid = this.props.uuid;
         this.paymentMethodType = this.props.paymentMethodType;
-        this.paymentMethodName=this.paymentMethodName;
+        this.paymentMethodName=this.props.paymentMethodName;
         this.paymentMethodId = this.props.paymentMethodId;
         this.token = this.props.token;
         this.countryCode = "";
+        this._buttonClicked = false;
 
         const partner = this.props.order.get_partner?.() || {};
         const orderlines = this.order.get_orderlines?.() || [];
@@ -97,6 +98,8 @@ export class PrebuiltPopup extends Component {
     async nextStep() {
         if (this.state.step < 3) {
             if (this.state.step == 2) {
+                if (this._buttonClicked) return;
+                this._buttonClicked = true;
                 // Get country code
                 await this.pos.data.silentCall("pos.payment", "get_country_code", [
                     [this.paymentMethodId],
@@ -131,7 +134,6 @@ export class PrebuiltPopup extends Component {
 
                 // Call dinger with payload
                 await this.pos.data.silentCall("pos.payment", "make_payment", [
-                    [this.paymentMethodId],
                     this.token,
                     payload,
                 ]).then(async (result) => {
@@ -199,7 +201,7 @@ export class PrebuiltPopup extends Component {
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 3000));
                 }
-            } catch (error) {
+            } catch (_) {
                 await new Promise(resolve => setTimeout(resolve, 3000));
             }
         }
