@@ -2,9 +2,13 @@
 This module defines the PaymentStatus model, which is used to
 store the status information from the Dinger payment callback.
 """
+
 from odoo import fields, models
 
-from ...dinger_mixin.dataclasses.datamodels import JournalCodeEnum, TransactionStatusEnum
+from ...dinger_mixin.dataclasses.datamodels import (
+    JournalCodeEnum,
+    TransactionStatusEnum,
+)
 
 
 class PaymentStatus(models.Model):
@@ -19,6 +23,7 @@ class PaymentStatus(models.Model):
     Args:
         models (_type_): _description_
     """
+
     _name = "pos.payment.status"
     _description = "To store the status information from the dinger payment call back"
     _rec_name = "merchant_order"
@@ -29,7 +34,9 @@ class PaymentStatus(models.Model):
         string="Merchant Order",
         help="Reference to the POS order associated with this payment status.",
     )
-    provider_name = fields.Selection(selection=JournalCodeEnum.get_selection(), string="Provider Name")
+    provider_name = fields.Selection(
+        selection=JournalCodeEnum.get_selection(), string="Provider Name"
+    )
     received_method = fields.Char(string="Received By")
     customer_name = fields.Char(string="Customer")
     # Here need to change float to monetary : fact- return value are float amount
@@ -40,4 +47,3 @@ class PaymentStatus(models.Model):
         default="draft",
     )
     paid_at = fields.Datetime(string="Paid At")
-
