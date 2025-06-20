@@ -85,7 +85,7 @@ class PosOrderController(http.Controller):
         create_new_pos_payment_status(result)
         return "Data is store successfully"
 
-    # Start write to pos.payment.status for the sale order line with draft state
+    # Start write to pos.payment.status for the sale order line with draft state.
     @http.route(
         "/pos/payment_status/create_draft",
         type="json",
