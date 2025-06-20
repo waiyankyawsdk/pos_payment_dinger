@@ -3,12 +3,17 @@ This module defines the PaymentStatus model, which is used to
 store the status information from the Dinger payment callback.
 """
 
+from datetime import datetime
+
 from odoo import fields, models
 
-from ...dinger_mixin.dataclasses.datamodels import (
-    JournalCodeEnum,
-    TransactionStatusEnum,
-)
+from ...dinger_mixin.dataclasses.datamodels import (JournalCodeEnum,
+                                                    TransactionStatusEnum)
+
+@staticmethod
+def convert_paid_at(date_str: str) -> str:
+    """Convert the date string from Dinger format to Odoo format."""
+    return datetime.strptime(date_str, "%Y%m%d %H%M%S").strftime("%Y-%m-%d %H:%M:%S")
 
 
 class PaymentStatus(models.Model):
@@ -47,3 +52,31 @@ class PaymentStatus(models.Model):
         default="draft",
     )
     paid_at = fields.Datetime(string="Paid At")
+
+    def create_payment_status(self, data:dict):
+        """Create or update a pos.payment.status record based on the provided data.
+
+        Args:
+        data (dict): Payment data from Dinger webhook or draft creation.
+        """
+        merchant_order = data.get("merchantOrderId")  # This is order.name
+
+        vals = {
+            "reference": data.get("transactionId"),
+            "provider_name": data.get("providerName"),
+            "received_method": data.get("methodName"),
+            "customer_name": data.get("customerName"),
+            "total": data.get("totalAmount"),
+            "state": data.get("transactionStatus"),
+            "paid_at": self.convert_paid_at(data.get("createdAt")),
+        }
+
+        record = self.env["pos.payment.status"].sudo().search(
+            [("merchant_order", "=", merchant_order)], limit=1
+        )
+        if record:
+            record.write(vals)
+        else:
+            vals["merchant_order"] = merchant_order
+            record=self.env["pos.payment.status"].sudo().create(vals)
+        return record.id
