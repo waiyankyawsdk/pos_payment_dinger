@@ -14,7 +14,6 @@ export class PrebuiltPopup extends Component {
         uuid: String,
         paymentMethodType: String,
         paymentMethodId: Number,
-        token: String,
         getPayload: Function,
         title: String,
         close: Function,
@@ -31,7 +30,6 @@ export class PrebuiltPopup extends Component {
         this.paymentMethodType = this.props.paymentMethodType;
         this.paymentMethodName=this.props.paymentMethodName;
         this.paymentMethodId = this.props.paymentMethodId;
-        this.token = this.props.token;
         this.countryCode = "";
         this._buttonClicked = false;
 
@@ -101,14 +99,15 @@ export class PrebuiltPopup extends Component {
                 if (this._buttonClicked) return;
                 this._buttonClicked = true;
                 // Get country code
-                await this.pos.data.silentCall("pos.payment", "get_country_code", [
-                    [this.paymentMethodId],
-                    this.state.country,
-                ]).then((result) => {
-                    this.countryCode = result;
-                }).catch((error) => {
-                    throw error;
-                });
+//                await this.pos.data.silentCall("pos.payment", "get_country_code", [
+//                    [this.paymentMethodId],
+//                    this.state.country,
+//                ]).then((result) => {
+//                    this.countryCode = result;
+//                }).catch((error) => {
+//                    throw error;
+//                });
+                this.countryCode="MM";
 
                 // Create Payload
                 const payload = {
@@ -132,15 +131,18 @@ export class PrebuiltPopup extends Component {
                     }))),
                 };
 
+
                 // Call dinger with payload
                 await this.pos.data.silentCall("pos.payment", "make_payment", [
-                    this.token,
                     payload,
                 ]).then(async (result) => {
+                    console.log("Start working result :",result);
                     if (result) {
+                        console.log("Start working make payment");
                         this._qrResult = result; // Store for useEffect
                         this.state.step += 1;    // Triggers QR code generation in useEffect
                         await this.savePaymentStatus();
+                        console.log("Start working make payment");
                         this.pollPaymentStatus(this.order.name);
                     }
                 }).catch((error) => {

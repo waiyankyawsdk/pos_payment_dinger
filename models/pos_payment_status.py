@@ -68,7 +68,7 @@ class PaymentStatus(models.Model):
             "customer_name": data.get("customerName"),
             "total": data.get("totalAmount"),
             "state": data.get("transactionStatus"),
-            "paid_at": self.convert_paid_at(data.get("createdAt")),
+            "paid_at": convert_paid_at(data.get("createdAt")),
         }
 
         record = self.env["pos.payment.status"].sudo().search(

@@ -3,6 +3,7 @@
     "name": "Point Of Sale",
     "version": "1.0",
     "author": "SMEI",
+    'website': "https://www.smeintellect.com",
     "summary": "Integrate Dinger QR payment with Odoo POS for seamless Myanmar digital payments.",
     "description": "This module enables Odoo POS to accept payments via Dinger QR, allowing customers to pay easily using Myanmar digital wallets and banks. It provides a smooth integration for QR-based transactions, automatic payment status tracking, and is designed for businesses operating in Myanmar.",
     "depends": ["base", "web", "point_of_sale", "dinger_mixin"],

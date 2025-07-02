@@ -3,7 +3,6 @@ import json
 from odoo import http
 from odoo.http import request, route
 
-
 class PosOrderController(http.Controller):
     _webhook_url = "/pos/order/dinger_webhook"
 
@@ -20,7 +19,7 @@ class PosOrderController(http.Controller):
         # check_sum = post.get("checksum")
 
         # Decrypt the payment result
-        decrypted_str = request.env["pos.payment"].aes_decrypt(payment_result)
+        decrypted_str = request.env["pos.payment"].aes_decrypt(payment_result,"api")
 
         try:
             result = json.loads(decrypted_str)
